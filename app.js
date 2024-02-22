@@ -1,58 +1,69 @@
-var quiz = document.getElementById("quiz");
-var ques = document.getElementById("question");
-var opt1 = document.getElementById("option1");
-var opt2 = document.getElementById("option2");
-var opt3 = document.getElementById("option3");
-var opt4 = document.getElementById("option4");
-var result = document.getElementById("result");
-var nextbutton = document.getElementById("next");
-var q = document.getElementById('quit');
+//Questions
 
-var tques = questions.length;
-var score = 0;
-var quesindex = 0;
+let score = document.getElementById("score");
+let questionElement = document.getElementById("mainQuestion");
+let answerElements = [...document.getElementsByClassName("answer")];
 
-function quit() {
-    quiz.style.display = 'none';
-    result.style.display = '';
-    let f = score / tques;
-    result.textContent = "SCORE =" + f * 100;
-    q.style.display = "none";
-}
+let countingScore = 0;
+let correctProp;
+let currentQuestionIndex = 0;
+// Mélanger les questions à chaque initialisation
+let shuffledQuestions = quizJS.sort(() => Math.random() - 0.5);
 
-function give_ques(quesindex) {
-    ques.textContent = quesindex + 1 + ". " + questions[quesindex][0];
-    opt1.textContent = questions[quesindex][1];
-    opt2.textContent = questions[quesindex][2];
-    opt3.textContent = questions[quesindex][3];
-    opt4.textContent = questions[quesindex][4];
+function initialised() {
+  score.textContent = countingScore;
+
+  // Vérifiez si toutes les questions ont été posées
+  if (currentQuestionIndex >= shuffledQuestions.length) {
+    // Toutes les questions ont été posées
+    if (countingScore === quizJS.length) {
+      window.alert("Félicitations ! Vous avez terminé le quiz.");
+      window.location.reload();
+    }
+    // Réinitialiser l'état du quiz
+    currentQuestionIndex = 0;
+    countingScore = 0;
+    shuffledQuestions = quizJS.sort(() => Math.random() - 0.5);
     return;
-};
+  }
 
-give_ques(0);
+  // Sélectionner la première question
+  const currentQuestion = shuffledQuestions[currentQuestionIndex];
 
-function nextques() {
-    var selected_ans = document.querySelector('input[type=radio]:checked');
-    if (!selected_ans) {
-        alert("SELECT AN OPTION");
-        return;
-    }
+  // Afficher la question
+  questionElement.textContent = currentQuestion.question;
 
-    if (selected_ans.value == questions[quesindex][5]) {
-        score = score + 1;
-    }
-    selected_ans.checked = false;
-    quesindex++;
-    if (quesindex == tques - 1)
-        nextbutton.textContent = "Finish";
-    var f = score / tques;
-    if (quesindex == tques) {
-        q.style.display = 'none';
-        quiz.style.display = 'none';
-        result.style.display = '';
-        result.textContent = "SCORED:" + (f * 100).toFixed(2) + "%";
-        return;
-    }
-    give_ques(quesindex);
+  // Definir la bonne réponse
+  const goodAnswer = currentQuestion.resultIndex;
+  correctProp = currentQuestion.prop[goodAnswer];
+  console.log(correctProp);
 
+  // Mélanger les propositions
+  const shuffledProps = currentQuestion.prop.sort(() => Math.random() - 0.5);
+
+  // Afficher les propositions
+  answerElements.forEach((answerElement, index) => {
+    answerElement.textContent = shuffledProps[index];
+  });
 }
+
+function verifierReponse(e) {
+  let valeurCliquee = e.target.textContent;
+
+  if (valeurCliquee !== correctProp) {
+    window.alert(`Dommage, la réponse était : ${correctProp}! Vous avez réussi ${countingScore} questions.`);
+    countingScore = 0;
+  } else {
+    window.alert("Bravo !");
+    countingScore++;
+  }
+
+  currentQuestionIndex++;
+  initialised();
+}
+
+answerElements.forEach((answerElement) => {
+  answerElement.addEventListener("click", verifierReponse);
+});
+
+initialised();
