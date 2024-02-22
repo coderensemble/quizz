@@ -1,4 +1,4 @@
-# quizz
+# quizzJs
 Documentation de l'application Quiz
 
 Introduction
